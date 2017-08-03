@@ -12,7 +12,7 @@
 
     <groupId>io.craigmiller160</groupId>
     <artifactId>kotlin-commons</artifactId>
-    <version>1.0</version>
+    <version>1.0.1</version>
     <packaging>jar</packaging>
 
     <dependencies>

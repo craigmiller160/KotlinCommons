@@ -8,7 +8,6 @@ import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.ResultSet
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class StatementUtilsTest {
