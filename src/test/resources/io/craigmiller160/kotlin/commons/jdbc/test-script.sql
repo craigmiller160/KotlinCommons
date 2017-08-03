@@ -5,3 +5,6 @@ CREATE TABLE people (
   last_name VARCHAR(255),
   PRIMARY KEY (person_id)
 );
+
+INSERT INTO people(first_name, middle_name, last_name) VALUES ('Bob','Eugene','Saget');
+INSERT INTO people(first_name, middle_name, last_name) VALUES ('John','Henry','Doe');
