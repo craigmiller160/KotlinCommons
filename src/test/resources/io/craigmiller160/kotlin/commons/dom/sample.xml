@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Root>
+    <Person>
+        <Name>Bob</Name>
+        <Age>30</Age>
+    </Person>
+    <Person>
+        <Name>Jean</Name>
+        <Age>28</Age>
+    </Person>
+    <Person>
+        <Name>Jimmy</Name>
+        <Age>60</Age>
+    </Person>
+</Root>
