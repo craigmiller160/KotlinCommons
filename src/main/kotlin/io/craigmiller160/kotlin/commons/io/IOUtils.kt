@@ -11,7 +11,7 @@ import java.nio.charset.Charset
  * @return a String with the contents of the stream.
  * @throws IOException if an IO error occurs.
  */
-fun InputStream.asString(charset: Charset = Charsets.UTF_8): String{
+fun InputStream.readText(charset: Charset = Charsets.UTF_8): String{
     return this.bufferedReader(charset).readText()
 }
 
@@ -24,6 +24,6 @@ fun InputStream.asString(charset: Charset = Charsets.UTF_8): String{
  * @return a String with the contents of the stream.
  * @throws IOException if an IO error occurs.
  */
-fun InputStream.useAsString(charset: Charset = Charsets.UTF_8): String{
+fun InputStream.useReadText(charset: Charset = Charsets.UTF_8): String{
     return this.use { it.bufferedReader(charset).readText() }
 }
