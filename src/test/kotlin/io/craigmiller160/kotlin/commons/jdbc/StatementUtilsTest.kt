@@ -72,19 +72,19 @@ class StatementUtilsTest : JdbcTestCommons() {
         }
     }
 
-    @Test
-    fun testPreparedStatementQuickQuery(){
-        var recordCount = 0
-        var stmt: PreparedStatement? = null
-        try{
-            stmt = conn.prepareStatement("SELECT COUNT(*) FROM people WHERE first_name = ?")
-            stmt.quickQuery("Clark"){
-
-            }
-        }
-        finally{
-            stmt?.close()
-        }
-    }
+//    @Test
+//    fun testPreparedStatementQuickQuery(){
+//        var recordCount = 0
+//        var stmt: PreparedStatement? = null
+//        try{
+//            stmt = conn.prepareStatement("SELECT COUNT(*) FROM people WHERE first_name = ?")
+//            stmt.quickQuery("Clark"){
+//
+//            }
+//        }
+//        finally{
+//            stmt?.close()
+//        }
+//    }
 
 }
