@@ -8,3 +8,5 @@ CREATE TABLE people (
 
 INSERT INTO people(first_name, middle_name, last_name) VALUES ('Bob','Eugene','Saget');
 INSERT INTO people(first_name, middle_name, last_name) VALUES ('John','Henry','Doe');
+INSERT INTO people(first_name, middle_name, last_name) VALUES ('Clark', 'Bob', 'Kent');
+INSERT INTO people(first_name, middle_name, last_name) VALUES ('Clark', 'Henry', 'Gable');

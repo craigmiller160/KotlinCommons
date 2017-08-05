@@ -1,6 +1,7 @@
 package io.craigmiller160.kotlin.commons.jdbc
 
 import org.junit.Test
+import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Statement
 import kotlin.test.assertEquals
@@ -10,24 +11,20 @@ import kotlin.test.assertTrue
 class StatementUtilsTest : JdbcTestCommons() {
 
     @Test
-    fun testUseQuickQuery(){
+    fun testStatementQuickQuery(){
         var recordCount = 0
         var stmt: Statement? = null
         try{
             stmt = conn.createStatement()
             var result: ResultSet? = null
-            stmt.useQuickQuery("SELECT * FROM people ORDER BY person_id ASC"){ rs ->
+            stmt.quickQuery("SELECT * FROM people ORDER BY person_id ASC"){ rs ->
                 result = rs
-                assertTrue("ResultSet doesn't have first record") { rs.next() }
-                recordCount++
-                assertEquals("Bob", rs.getString("first_name"), "Wrong value for first first_name")
-
-                assertTrue("ResultSet doesn't have second value") { rs.next() }
-                recordCount++
-                assertEquals("John", rs.getString("first_name"), "Wrong value for second first_name")
+                while(rs.next()){
+                    recordCount++
+                }
             }
 
-            assertEquals(2, recordCount, "Wrong number of records found")
+            assertEquals(4, recordCount, "Wrong number of records found")
             assertTrue("ResultSet did not get closed") { result?.isClosed ?: false }
             assertFalse("Statement should not be closed") { stmt?.isClosed ?: false }
         }
@@ -37,24 +34,53 @@ class StatementUtilsTest : JdbcTestCommons() {
     }
 
     @Test
-    fun testUseQuickQueryItr(){
+    fun testStatementQuickQueryItr(){
         var recordCount = 0
         var stmt: Statement? = null
         try{
             stmt = conn.createStatement()
-            stmt.useQuickQueryItr("SELECT * FROM people ORDER BY person_id ASC") { rs ->
-                rs.forEachIndexed { i, rs ->
-                    recordCount++
-                    when(i){
-                        0 -> assertEquals("Bob", rs.getString("first_name"), "Wrong value for first first_name")
-                        1 -> assertEquals("John", rs.getString("first_name"), "Wrong value for second first_name")
-                        else -> throw Exception("Invalid index: " + i)
-                    }
-                }
+            stmt.quickQueryItr("SELECT * FROM people ORDER BY person_id ASC") { rs ->
+                rs.forEach { recordCount++ }
             }
 
-            assertEquals(2, recordCount, "Wrong number of records found")
+            assertEquals(4, recordCount, "Wrong number of records found")
             assertFalse("Statement should not be closed") { stmt?.isClosed ?: false }
+        }
+        finally{
+            stmt?.close()
+        }
+    }
+
+    @Test
+    fun testPreparedStatementQuickUpdate(){
+        var recordCount = 0
+        var stmt: PreparedStatement? = null
+        try{
+            stmt = conn.prepareStatement("INSERT INTO people (first_name, last_name) VALUES (?,?)")
+            val result = stmt.quickUpdate("Jimmy", "Olson")
+            assertEquals(1, result, "Wrong number of rows updated")
+            assertTrue("PreparedStatement should be closed") { stmt?.isClosed ?: false}
+
+            stmt = conn.prepareStatement("SELECT COUNT(*) FROM people WHERE first_name = 'Jimmy'")
+            val rs = stmt.executeQuery()
+            assertTrue("ResultSet has no records") { rs.next() }
+            val count = rs.getInt(1)
+            assertEquals(1, count, "Record was not inserted")
+        }
+        finally{
+            stmt?.close()
+        }
+    }
+
+    @Test
+    fun testPreparedStatementQuickQuery(){
+        var recordCount = 0
+        var stmt: PreparedStatement? = null
+        try{
+            stmt = conn.prepareStatement("SELECT COUNT(*) FROM people WHERE first_name = ?")
+            stmt.quickQuery("Clark"){
+
+            }
         }
         finally{
             stmt?.close()

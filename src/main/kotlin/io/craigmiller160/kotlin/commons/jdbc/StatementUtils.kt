@@ -18,7 +18,7 @@ import java.sql.Statement
  * @throws SQLException if there is an error, either with the
  *         database or the statement.
  */
-fun <R> Statement.useQuickQuery(query: String, block: (rs: ResultSet) -> R): R{
+fun <R> Statement.quickQuery(query: String, block: (rs: ResultSet) -> R): R{
     return this.executeQuery(query).use { block(it) }
 }
 
@@ -38,7 +38,7 @@ fun <R> Statement.useQuickQuery(query: String, block: (rs: ResultSet) -> R): R{
  * @throws SQLException if there is an error, either with the
  *         database or the statement.
  */
-fun <R> Statement.useQuickQueryItr(query: String, block: (rs: ResultSetItr) -> R): R{
+fun <R> Statement.quickQueryItr(query: String, block: (rs: ResultSetItr) -> R): R{
     return this.executeQuery(query).useItr(block)
 }
 
@@ -58,45 +58,11 @@ fun <R> Statement.useQuickQueryItr(query: String, block: (rs: ResultSetItr) -> R
  * @throws SQLException if there is an error, either with the
  *         database or the statement.
  */
-fun PreparedStatement.useQuickUpdate(vararg params: Any): Int{
-    return this.use { this.quickUpdate(*params) }
-}
-
-/**
- * Perform a quick SQL update. If there are parameters
- * passed in, they will be applied to the PreparedStatement
- * in the order they are provided.
- *
- * Please note that this function relies on PreparedStatement.setObject(Int,Any),
- * so if the JDBC Driver being used can't handle dynamically assigning
- * types to the parameters this will fail.
- *
- * @param params the optional parameters for the SQL statement.
- * @return either (1) the row count for SQL Data Manipulation Language (DML) statements
- *         or (2) 0 for SQL statements that return nothing.
- * @throws SQLException if there is an error, either with the
- *         database or the statement.
- */
 fun PreparedStatement.quickUpdate(vararg params: Any): Int{
-    addParams(this, *params)
-    return this.executeUpdate()
-}
-
-/**
- * Perform a quick SQL query. If there are parameters
- * passed in, they will be applied to the PreparedStatement
- * in the order they are provided. A ResultSet is returned.
- *
- * Please note that this function relies on PreparedStatement.setObject(Int,Any),
- * so if the JDBC Driver being used can't handle dynamically assigning
- * types to the parameters this will fail.
- *
- * @param params the optional parameters for the SQL statement.
- * @return the ResultSet.
- */
-fun PreparedStatement.quickQuery(vararg params: Any): ResultSet {
-    addParams(this, *params)
-    return this.executeQuery()
+    return this.use {
+        addParams(this, *params)
+        this.executeUpdate()
+    }
 }
 
 /**
@@ -106,11 +72,21 @@ fun PreparedStatement.quickQuery(vararg params: Any): ResultSet {
  * executed to handle the ResultSet returned by the query,
  * and the result of the function is returned.
  *
+ * Upon completion of the function block, the ResultSet and
+ * Statement are safely closed.
+ *
+ * Please note that this function relies on PreparedStatement.setObject(Int,Any),
+ * so if the JDBC Driver being used can't handle dynamically assigning
+ * types to the parameters this will fail.
+ *
  * @param params the optional parameters for the SQL statement.
  * @return the result of the function block.
  */
-fun <R> PreparedStatement.useQuickQuery(vararg params: Any, block: (rs: ResultSet) -> R): R {
-    return this.use { block(this.quickQuery(*params)) }
+fun <R> PreparedStatement.quickQuery(vararg params: Any, block: (rs: ResultSet) -> R): R {
+    return this.use {
+        addParams(this, *params)
+        block(this.executeQuery())
+    }
 }
 
 /**
@@ -123,8 +99,11 @@ fun <R> PreparedStatement.useQuickQuery(vararg params: Any, block: (rs: ResultSe
  * @param params the optional parameters for the SQL statement.
  * @return the result of the function block.
  */
-fun <R> PreparedStatement.useQuickQueryItr(vararg params: Any, block: (rs: ResultSetItr) -> R): R {
-    return this.use { this.quickQuery(*params).useItr { block(it) } }
+fun <R> PreparedStatement.quickQueryItr(vararg params: Any, block: (rs: ResultSetItr) -> R): R {
+    return this.use {
+        addParams(this, *params)
+        this.executeQuery().useItr(block)
+    }
 }
 
 private fun addParams(stmt: PreparedStatement, vararg params: Any){
