@@ -8,3 +8,7 @@ private fun factorialRecursive(factor: Long, value: Long): Long{
     val newValue = value - 1
     return if(newValue > 0) factorialRecursive(factor * newValue, newValue) else factor
 }
+
+fun numCombinations(numRepetition: Int, numChoices: Int): Int{
+    return Math.pow(numChoices.toDouble(), numRepetition.toDouble()).toInt()
+}

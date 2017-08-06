@@ -11,4 +11,10 @@ class MathFunctionsTest {
         assertEquals(120, result, "Wrong result of factorial")
     }
 
+    @Test
+    fun testNumCombinations(){
+        val result = numCombinations(8, 2)
+        assertEquals(256, result, "Wrong result of numCombinations")
+    }
+
 }
