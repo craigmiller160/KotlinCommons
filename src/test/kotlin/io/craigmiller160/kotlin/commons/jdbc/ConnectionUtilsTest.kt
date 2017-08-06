@@ -42,10 +42,13 @@ class ConnectionUtilsTest : JdbcTestCommons() {
 
     @Test
     fun testQuickBatch(){
-        conn.quickBatch("INSERT INTO people (first_name, last_name) VALUES (?,?)"){
+        val result = conn.quickBatch("INSERT INTO people (first_name, last_name) VALUES (?,?)"){
             addBatch("Jimmy", "Olson")
             addBatch("Perry", "White")
         }
+
+        assertEquals(2, result.size, "Wrong number of result values")
+        result.forEachIndexed { index,value -> assertEquals(1, value, "Wrong number of records updated for result: $index") }
 
         conn.prepareStatement("SELECT * FROM people WHERE person_id > 4 ORDER BY person_id ASC").use { it.executeQuery().use { rs ->
             assertTrue("ResultSet doesn't have first record") { rs.next() }

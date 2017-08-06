@@ -24,12 +24,11 @@ fun Connection.quickUpdate(sql: String, vararg params: Any): Int{
     }
 }
 
-//TODO need a return type here
-fun Connection.quickBatch(sql: String, block: BatchStmt.() -> Unit){
+fun Connection.quickBatch(sql: String, block: BatchStmt.() -> Unit): IntArray{
     this.prepareStatement(sql).use { stmt ->
         stmt.queryTimeout = this.quickTimeout
         BatchStmt(stmt).block()
-        stmt.executeBatch()
+        return stmt.executeBatch()
     }
 }
 
