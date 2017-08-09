@@ -19,20 +19,10 @@ import java.util.zip.ZipInputStream
  *          for, or null if no match was found.
  * @throws IOException if an IO error occurs.
  */
-fun ZipInputStream.findEntry(accept: (entry: ZipEntry) -> Boolean): InputStream?{
-    var found = false
-    var entry: ZipEntry? = null
-    while({entry = this.nextEntry; entry }() != null){
-        try{
-            if(accept(entry as ZipEntry)){
-                found = true
-                return this
-            }
-        }
-        finally{
-            if(!found){
-                this.closeEntry()
-            }
+fun ZipInputStream.findEntry(accept: (entry: ZipEntry) -> Boolean): InputStream?{ //TODO need to test that the entry doesn't get closed before the stream is returned
+    for(entry in this){
+        if(accept(entry)){
+            return this
         }
     }
 
@@ -50,13 +40,28 @@ fun ZipInputStream.findEntry(accept: (entry: ZipEntry) -> Boolean): InputStream?
  * @throws IOException if an IO error occurs.
  */
 fun ZipInputStream.forEachEntry(block: (entry: ZipEntry, stream: InputStream) -> Unit) {
-    var entry: ZipEntry? = null
-    while({entry = this.nextEntry; entry }() != null){
-        try{
-            block(entry as ZipEntry, this)
-        }
-        finally{
-            this.closeEntry()
-        }
+    for(entry in this){
+        block(entry, this)
+    }
+}
+
+/**
+ * Iterate over all ZipEntry elements in
+ * this ZipInputStream. Each entry is closed
+ * before moving on to the next one.
+ *
+ * @return an Iterator of ZipEntry elements.
+ */
+operator fun ZipInputStream.iterator() = object : Iterator<ZipEntry> {
+    var next: ZipEntry? = null
+
+    override fun hasNext(): Boolean {
+        if(next != null) closeEntry()
+        next = nextEntry
+        return next != null
+    }
+
+    override fun next(): ZipEntry {
+        return next ?: throw NoSuchElementException("Next ZipEntry not available")
     }
 }
