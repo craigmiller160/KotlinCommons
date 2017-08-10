@@ -1,52 +1,56 @@
 package io.craigmiller160.kotlin.commons.jdbc
-//
-//import java.sql.ResultSet
-//
-///**
-// * An Iterable wrapper for the ResultSet class.
-// * This allows for all the Iterable functions
-// * to be called on the underlying ResultSet.
-// *
-// * @param resultSet the ResultSet to be wrapped.
-// */
-//class ResultSetItr(private val resultSet: ResultSet) : Iterable<ResultSet>{
-//    override fun iterator(): Iterator<ResultSet> {
-//        return object : Iterator<ResultSet>{
-//            override fun hasNext(): Boolean {
-//                return resultSet.next()
-//            }
-//
-//            override fun next(): ResultSet {
-//                return resultSet
-//            }
-//        }
-//    }
-//}
-//
-///**
-// * Get an Iterable version of this ResultSet
-// * so that it can be iterated over using
-// * the Iterable functions.
-// *
-// * @return an Iterable version of this ResultSet.
-// */
-//fun ResultSet.itr(): ResultSetItr{
-//    return ResultSetItr(this)
-//}
-//
-///**
-// * Execute a function block with an Iterable
-// * version of this ResultSet, so that the
-// * function block can iterate over it using
-// * the Iterable functions. When the function
-// * block is finished, the ResultSet is closed
-// * and the result of the function block is
-// * returned.
-// *
-// * @param block the function to iterate over the ResultSet.
-// * @param R the return type of the function block.
-// * @return the result of the function block.
-// */
-//fun <R> ResultSet.useItr(block: (rs: ResultSetItr) -> R): R{
-//    return this.use { block(ResultSetItr(this)) }
-//}
+
+import java.sql.ResultSet
+
+fun ResultSet.itr(): Iterable<ResultSetRecord>{
+    return ResultSetItr(this)
+}
+
+fun <R> ResultSet.useItr(block: (rs: Iterable<ResultSetRecord>) -> R): R{
+    return this.use { block(ResultSetItr(this)) }
+}
+
+class ResultSetItr internal constructor(private val resultSet: ResultSet) : Iterable<ResultSetRecord>{
+
+    private val nameIndexMap = HashMap<String,Int>()
+
+    init {
+        val metaData = resultSet.metaData
+        (0..metaData.columnCount).forEach { index ->
+            val colName = metaData.getColumnName(index)
+            nameIndexMap += colName.toUpperCase() to index
+        }
+    }
+
+    override fun iterator(): Iterator<ResultSetRecord> {
+        return object : Iterator<ResultSetRecord> {
+            override fun hasNext(): Boolean {
+                return resultSet.next()
+            }
+
+            override fun next(): ResultSetRecord {
+                return ResultSetRecord(resultSet, nameIndexMap)
+            }
+        }
+    }
+}
+
+data class ResultSetRecord internal constructor(private val resultSet: ResultSet, private val nameIndexMap: Map<String,Int>) {
+
+    private val values = ArrayList<Any>()
+
+    init {
+        (0..nameIndexMap.size).forEach { index -> values += resultSet.getObject(index) }
+    }
+
+    fun get(name: String): Any{
+        val index = nameIndexMap[name] ?: throw NoSuchElementException("No record in ResultSet for column name $name")
+        return values[index]
+    }
+
+    fun get(index: Int): Any{
+        if(index >= values.size) throw NoSuchElementException("No record in ResultSet for column index $index")
+        return values[index]
+    }
+
+}
