@@ -16,7 +16,7 @@ class ResultSetItr internal constructor(private val resultSet: ResultSet) : Iter
 
     init {
         val metaData = resultSet.metaData
-        (0..metaData.columnCount).forEach { index ->
+        (1..metaData.columnCount).forEach { index ->
             val colName = metaData.getColumnName(index)
             nameIndexMap += colName.toUpperCase() to index
         }
@@ -40,7 +40,7 @@ data class ResultSetRecord internal constructor(private val resultSet: ResultSet
     private val values = ArrayList<Any>()
 
     init {
-        (0..nameIndexMap.size).forEach { index -> values += resultSet.getObject(index) }
+        (1..nameIndexMap.size).forEach { index -> values += resultSet.getObject(index) }
     }
 
     fun get(name: String): Any{
