@@ -12,6 +12,7 @@ class StringUtilsTest {
         assertTrue("The text is not numeric") { text.isNumeric() }
     }
 
+    @Test
     fun testIsNumericFalse(){
         val text = "Hello World"
         assertFalse("The text is numeric") { text.isNumeric() }
