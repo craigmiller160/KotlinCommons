@@ -12,8 +12,17 @@ var Connection.quickTimeout: Int by ExtensionProperty(0)
 fun Connection.quickQuery(sql: String, vararg params: Any, block: (rs: ResultSet) -> Unit){
     this.prepareStatement(sql).use { stmt ->
         stmt.queryTimeout = this.quickTimeout
-        params.forEachIndexed { i,p -> stmt.setObject(i + 1 ,p) }
+        params.forEachIndexed { i,p -> stmt.setObject(i + 1, p) }
         stmt.executeQuery().use { rs -> while(rs.next()){ block(rs) } }
+    }
+}
+
+//TODO need unit test for this, both that it works and that it will return the correct value
+fun <R> Connection.quickQueryItr(sql: String, vararg params: Any, block: (rs: Iterable<ResultSetRecord>) -> R): R{
+    this.prepareStatement(sql).use { stmt ->
+        stmt.queryTimeout = this.quickTimeout
+        params.forEachIndexed { i, p -> stmt.setObject(i + 1, p) }
+        return stmt.executeQuery().useItr(block)
     }
 }
 
