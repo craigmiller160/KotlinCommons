@@ -43,14 +43,16 @@ data class ResultSetRecord internal constructor(private val resultSet: ResultSet
         (1..nameIndexMap.size).forEach { index -> values += resultSet.getObject(index) }
     }
 
+    //TODO make the getters operator functions
+
     fun get(name: String): Any{
-        val index = nameIndexMap[name] ?: throw NoSuchElementException("No record in ResultSet for column name $name")
-        return values[index]
+        val index = nameIndexMap[name.toUpperCase()] ?: throw NoSuchElementException("No record in ResultSet for column name $name")
+        return values[index - 1]
     }
 
     fun get(index: Int): Any{
-        if(index >= values.size) throw NoSuchElementException("No record in ResultSet for column index $index")
-        return values[index]
+        if(index > values.size || index == 0) throw NoSuchElementException("No record in ResultSet for column index $index")
+        return values[index - 1]
     }
 
 }
