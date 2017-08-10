@@ -1,6 +1,7 @@
 package io.craigmiller160.kotlin.commons.jdbc
 
 import java.sql.ResultSet
+import kotlin.reflect.KClass
 
 fun ResultSet.itr(): Iterable<ResultSetRecord>{
     return ResultSetItr(this)
@@ -43,16 +44,24 @@ data class ResultSetRecord internal constructor(private val resultSet: ResultSet
         (1..nameIndexMap.size).forEach { index -> values += resultSet.getObject(index) }
     }
 
-    //TODO make the getters operator functions
-
-    fun get(name: String): Any{
+    operator fun get(name: String): Any{
         val index = nameIndexMap[name.toUpperCase()] ?: throw NoSuchElementException("No record in ResultSet for column name $name")
         return values[index - 1]
     }
 
-    fun get(index: Int): Any{
+    operator fun get(index: Int): Any{
         if(index > values.size || index == 0) throw NoSuchElementException("No record in ResultSet for column index $index")
         return values[index - 1]
+    }
+
+    operator fun <T : Any> get(name: String, type: KClass<T>): T{
+        val value = get(name)
+        return if(type.isInstance(value)) value as T else throw NoSuchElementException("No record in ResultSet for column name $name and type ${type.qualifiedName}")
+    }
+
+    operator fun <T : Any> get(index: Int, type: KClass<T>): T{
+        val value = get(index)
+        return if(type.isInstance(value)) value as T else throw NoSuchElementException("No record in ResultSet for column index $index and type ${type.qualifiedName}")
     }
 
 }

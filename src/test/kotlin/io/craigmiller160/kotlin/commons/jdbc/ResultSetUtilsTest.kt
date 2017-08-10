@@ -16,13 +16,21 @@ class ResultSetUtilsTest : JdbcTestCommons() {
             val rs = stmt.executeQuery("SELECT * FROM people ORDER BY person_id ASC")
             rs.itr().forEachIndexed { index, record ->
                 recordCount++
-                val name = firstNames[index]
-                assertEquals(name, record.get(2), "Wrong value for first_name with index getter")
-                assertEquals(name, record.get("first_name"), "Wrong value for first_name with named getter")
+                testRecord(index, record)
             }
             assertEquals(4, recordCount, "Wrong number of records iterated over")
             assertFalse("ResultSet should not be closed") { rs.isClosed }
         }
+    }
+
+    fun testRecord(index: Int, record: ResultSetRecord){
+        val name = firstNames[index]
+        assertEquals(name, record[2], "Wrong value for first_name with index getter")
+        assertEquals(name, record[2, String::class], "Wrong value for first_name with index getter with type parameter")
+        assertEquals(String::class, record[2, String::class].javaClass.kotlin, "Wrong type of value returned by index getter with type parameter")
+        assertEquals(name, record["first_name"], "Wrong value for first_name with named getter")
+        assertEquals(name, record["first_name", String::class], "Wrong value for first_name with named getter with type parameter")
+        assertEquals(String::class, record["first_name", String::class].javaClass.kotlin, "Wrong type of value returned by named getter with type parameter")
     }
 
     @Test
@@ -32,9 +40,7 @@ class ResultSetUtilsTest : JdbcTestCommons() {
             val rs = stmt.executeQuery("SELECT * FROM people ORDER BY person_id ASC")
             rs.useItr { it.forEachIndexed { index, record ->
                 recordCount++
-                val name = firstNames[index]
-                assertEquals(name, record.get(2), "Wrong value for first_name with index getter")
-                assertEquals(name, record.get("first_name"), "Wrong value for first_name with named getter")
+                testRecord(index, record)
             } }
             assertEquals(4, recordCount, "Wrong number of records iterated over")
             assertTrue("ResultSet should be closed") { rs.isClosed }
