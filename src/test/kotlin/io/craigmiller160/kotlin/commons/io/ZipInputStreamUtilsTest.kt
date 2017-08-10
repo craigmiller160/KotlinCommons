@@ -21,7 +21,7 @@ class ZipInputStreamUtilsTest {
     fun testForEachEntry(){
         ZipInputStream(zip).use { zipStream ->
             var count = 0
-            zipStream.forEachEntry { entry, stream ->  println(entry.name); count++ }
+            zipStream.forEachEntry { entry, stream ->  count++ }
             assertEquals(7, count, "Wrong number of iterations")
         }
     }
