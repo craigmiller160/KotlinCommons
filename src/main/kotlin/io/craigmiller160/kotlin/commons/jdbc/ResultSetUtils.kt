@@ -7,7 +7,6 @@ fun ResultSet.itr(): Iterable<ResultSetRecord>{
     return ResultSetItr(this)
 }
 
-//TODO need unit tests that this will return the correct value
 fun <R> ResultSet.useItr(block: (rs: Iterable<ResultSetRecord>) -> R): R{
     return this.use { block(ResultSetItr(this)) }
 }

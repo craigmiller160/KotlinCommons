@@ -3,6 +3,7 @@ package io.craigmiller160.kotlin.commons.jdbc
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class ConnectionUtilsTest : JdbcTestCommons() {
@@ -61,6 +62,13 @@ class ConnectionUtilsTest : JdbcTestCommons() {
 
             assertFalse("ResultSet shouldn't have third record") { rs.next() }
         }}
+    }
+
+    @Test
+    fun testQuickQueryItr(){
+        val result = conn.quickQueryItr("SELECT * FROM people"){ itr -> itr.maxBy { record -> record[1, Long::class] } }
+        assertNotNull(result, "Max result is null")
+        assertEquals(4.toLong(), result!![1], "Wrong max result returned")
     }
 
 }

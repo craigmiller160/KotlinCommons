@@ -3,6 +3,7 @@ package io.craigmiller160.kotlin.commons.jdbc
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class ResultSetUtilsTest : JdbcTestCommons() {
@@ -44,6 +45,16 @@ class ResultSetUtilsTest : JdbcTestCommons() {
             } }
             assertEquals(4, recordCount, "Wrong number of records iterated over")
             assertTrue("ResultSet should be closed") { rs.isClosed }
+        }
+    }
+
+    @Test
+    fun testUseItrWithReturn(){
+        conn.createStatement().use { stmt ->
+            val rs = stmt.executeQuery("SELECT * FROM people ORDER BY person_id")
+            val result = rs.useItr { itr -> itr.maxBy { record -> record[1, Long::class] } }
+            assertNotNull(result, "Max result is null")
+            assertEquals(4.toLong(), result!![1], "Wrong max result returned")
         }
     }
 

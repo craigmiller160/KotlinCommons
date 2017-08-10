@@ -17,7 +17,6 @@ fun Connection.quickQuery(sql: String, vararg params: Any, block: (rs: ResultSet
     }
 }
 
-//TODO need unit test for this, both that it works and that it will return the correct value
 fun <R> Connection.quickQueryItr(sql: String, vararg params: Any, block: (rs: Iterable<ResultSetRecord>) -> R): R{
     this.prepareStatement(sql).use { stmt ->
         stmt.queryTimeout = this.quickTimeout
