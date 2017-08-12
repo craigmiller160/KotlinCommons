@@ -41,6 +41,37 @@ fun Connection.quickBatch(sql: String, block: BatchStmt.() -> Unit): IntArray{
     }
 }
 
+//TODO add unit tests for these
+fun Connection.parseAndExecuteScript(script: String): IntArray{
+    return parseAndExecuteScript(script.lineSequence())
+}
+
+fun Connection.parseAndExecuteScript(lines: Sequence<String>): IntArray{
+    val queries = ArrayList<String>()
+    var builder = StringBuilder()
+    var delimiter = ";"
+    lines.forEach { line ->
+        if(!line.trim().isBlank()){
+            if(line.trim().startsWith("delimiter", true)){
+                delimiter = line.toUpperCase().replace("DELIMITER", "").trim()
+            }
+            else if(line.trim().endsWith(delimiter)){
+                builder.appendln(line.trim().replace(delimiter, ""))
+                queries += builder.toString()
+                builder = StringBuilder()
+            }
+            else{
+                builder.appendln(line)
+            }
+        }
+    }
+
+    val results = IntArray(queries.size)
+
+    queries.forEachIndexed { index, query -> this.prepareStatement(query).use { stmt -> results[index] = stmt.executeUpdate() } }
+    return results
+}
+
 class BatchStmt internal constructor(val stmt: PreparedStatement) {
     fun addBatch(vararg params: Any){
         params.forEachIndexed { i,p -> stmt.setObject(i + 1, p) }
