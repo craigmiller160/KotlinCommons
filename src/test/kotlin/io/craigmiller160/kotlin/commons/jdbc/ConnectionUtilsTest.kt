@@ -4,6 +4,7 @@ import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class ConnectionUtilsTest : JdbcTestCommons() {
@@ -42,6 +43,21 @@ class ConnectionUtilsTest : JdbcTestCommons() {
     }
 
     @Test
+    fun testQuickUpdateNull(){
+        val result = conn.quickUpdate("INSERT INTO people (first_name, last_name) VALUES (?,?)", "Jimmy", null)
+        assertEquals(1, result, "Wrong number of rows updated")
+
+        conn.prepareStatement("SELECT * FROM people WHERE first_name = ?").use { stmt ->
+            stmt.setString(1, "Jimmy")
+            stmt.executeQuery().use { rs ->
+                assertTrue("ResultSet has no records") { rs.next() }
+                assertEquals("Jimmy", rs.getString("first_name"), "Wrong first record first_name")
+                assertNull(rs.getObject("last_name"), "Last name should be null")
+            }
+        }
+    }
+
+    @Test
     fun testQuickBatch(){
         val result = conn.quickBatch("INSERT INTO people (first_name, last_name) VALUES (?,?)"){
             addBatch("Jimmy", "Olson")
@@ -61,6 +77,24 @@ class ConnectionUtilsTest : JdbcTestCommons() {
             assertEquals("White", rs.getString("last_name"), "Wrong second record last_name")
 
             assertFalse("ResultSet shouldn't have third record") { rs.next() }
+        }}
+    }
+
+    @Test
+    fun testQuickBatchNull(){
+        val result = conn.quickBatch("INSERT INTO people (first_name, last_name) VALUES (?,?)"){
+            addBatch("Jimmy", null)
+        }
+
+        assertEquals(1, result.size, "Wrong number of result values")
+        result.forEachIndexed { index,value -> assertEquals(1, value, "Wrong number of records updated for result: $index") }
+
+        conn.prepareStatement("SELECT * FROM people WHERE person_id > 4 ORDER BY person_id ASC").use { it.executeQuery().use { rs ->
+            assertTrue("ResultSet doesn't have first record") { rs.next() }
+            assertEquals("Jimmy", rs.getString("first_name"), "Wrong first record first_name")
+            assertNull(rs.getObject("last_name"), "Last name should be null")
+
+            assertFalse("ResultSet shouldn't have second record") { rs.next() }
         }}
     }
 

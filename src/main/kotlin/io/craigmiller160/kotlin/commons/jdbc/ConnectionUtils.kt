@@ -4,31 +4,32 @@ import io.craigmiller160.kotlin.commons.extension.ExtensionProperty
 import java.sql.Connection
 import java.sql.PreparedStatement
 import java.sql.ResultSet
+import java.sql.Types
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
 var Connection.quickTimeout: Int by ExtensionProperty(0)
 
-fun Connection.quickQuery(sql: String, vararg params: Any, block: (rs: ResultSet) -> Unit){
+fun Connection.quickQuery(sql: String, vararg params: Any?, block: (rs: ResultSet) -> Unit){
     this.prepareStatement(sql).use { stmt ->
         stmt.queryTimeout = this.quickTimeout
-        params.forEachIndexed { i,p -> stmt.setObject(i + 1, p) }
+        handleParams(stmt, *params)
         stmt.executeQuery().use { rs -> while(rs.next()){ block(rs) } }
     }
 }
 
-fun <R> Connection.quickQueryItr(sql: String, vararg params: Any, block: (rs: Iterable<ResultSetRecord>) -> R): R{
+fun <R> Connection.quickQueryItr(sql: String, vararg params: Any?, block: (rs: Iterable<ResultSetRecord>) -> R): R{
     this.prepareStatement(sql).use { stmt ->
         stmt.queryTimeout = this.quickTimeout
-        params.forEachIndexed { i, p -> stmt.setObject(i + 1, p) }
+        handleParams(stmt, *params)
         return stmt.executeQuery().useItr(block)
     }
 }
 
-fun Connection.quickUpdate(sql: String, vararg params: Any): Int{
+fun Connection.quickUpdate(sql: String, vararg params: Any?): Int{
     this.prepareStatement(sql).use { stmt ->
         stmt.queryTimeout = this.quickTimeout
-        params.forEachIndexed { i,p -> stmt.setObject(i + 1, p) }
+        handleParams(stmt, *params)
         return stmt.executeUpdate()
     }
 }
@@ -73,8 +74,19 @@ fun Connection.parseAndExecuteScript(lines: Sequence<String>): IntArray{
 }
 
 class BatchStmt internal constructor(val stmt: PreparedStatement) {
-    fun addBatch(vararg params: Any){
-        params.forEachIndexed { i,p -> stmt.setObject(i + 1, p) }
+    fun addBatch(vararg params: Any?){
+        handleParams(stmt, *params)
         stmt.addBatch()
+    }
+}
+
+private fun handleParams(stmt: PreparedStatement, vararg params: Any?){
+    params.forEachIndexed { index, param ->
+        if(param != null){
+            stmt.setObject(index + 1, param)
+        }
+        else{
+            stmt.setNull(index + 1, Types.JAVA_OBJECT)
+        }
     }
 }
