@@ -33,6 +33,4 @@ class NodeListItr(val nodeList: NodeList, val nodeType: Short = 0) : Iterable<No
     }
 }
 
-fun NodeList.itr(nodeType: Short = 0): NodeListItr{
-    return NodeListItr(this, nodeType)
-}
+fun NodeList.itr(nodeType: Short = 0): NodeListItr = NodeListItr(this, nodeType)

@@ -3,13 +3,9 @@ package io.craigmiller160.kotlin.commons.jdbc
 import java.sql.ResultSet
 import kotlin.reflect.KClass
 
-fun ResultSet.itr(): Iterable<ResultSetRecord>{
-    return ResultSetItr(this)
-}
+fun ResultSet.itr(): Iterable<ResultSetRecord> = ResultSetItr(this)
 
-fun <R> ResultSet.useItr(block: (rs: Iterable<ResultSetRecord>) -> R): R{
-    return this.use { block(ResultSetItr(this)) }
-}
+fun <R> ResultSet.useItr(block: (rs: Iterable<ResultSetRecord>) -> R): R = this.use { block(ResultSetItr(this)) }
 
 class ResultSetItr internal constructor(private val resultSet: ResultSet) : Iterable<ResultSetRecord>{
 
