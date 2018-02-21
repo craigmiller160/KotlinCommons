@@ -32,6 +32,8 @@ object Resource {
     /**
      * Get a resource on the classpath as a String. This
      * expects the resource to be purely text content.
+     * The InputStream opened to read the resource is
+     * safely closed by this function.
      *
      * @param name the path to the resource.
      * @charset the character encoding of the resource,
