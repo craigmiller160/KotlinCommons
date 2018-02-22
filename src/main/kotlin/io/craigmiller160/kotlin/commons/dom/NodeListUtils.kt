@@ -12,7 +12,7 @@ class NodeListItr(val nodeList: NodeList, val nodeType: Short = 0) : Iterable<No
                     return pos < nodeList.length - 1
                 }
 
-                var tempPos = pos + 1
+                val tempPos = pos + 1
 
                 for(i in (tempPos..(nodeList.length - 1))){
                     val node = nodeList.item(i)
