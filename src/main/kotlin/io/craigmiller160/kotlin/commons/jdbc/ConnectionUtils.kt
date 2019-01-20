@@ -5,8 +5,6 @@ import java.sql.Connection
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.Types
-import kotlin.properties.ReadWriteProperty
-import kotlin.reflect.KProperty
 
 var Connection.quickTimeout: Int by ExtensionProperty(0)
 
