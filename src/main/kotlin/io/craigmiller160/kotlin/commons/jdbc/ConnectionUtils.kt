@@ -78,13 +78,27 @@ class BatchStmt internal constructor(val stmt: PreparedStatement) {
     }
 }
 
-private fun handleParams(stmt: PreparedStatement, vararg params: Any?){
-    params.forEachIndexed { index, param ->
+internal fun handleParams(stmt: PreparedStatement, vararg params: Any?){
+    var index = 0
+    params.forEach { param ->
         if(param != null){
-            stmt.setObject(index + 1, param)
+            if (param is List<*>) {
+                param.forEach { value ->
+                    stmt.setObject(index + 1, value)
+                    index++
+                }
+
+                if (param.size > 0) {
+                    index--
+                }
+            }
+            else {
+                stmt.setObject(index + 1, param)
+            }
         }
         else{
             stmt.setNull(index + 1, Types.JAVA_OBJECT)
         }
+        index++
     }
 }

@@ -1,6 +1,8 @@
 package io.craigmiller160.kotlin.commons.jdbc
 
+import io.craigmiller160.kotlin.commons.MockPreparedStatement
 import org.junit.Test
+import java.sql.Types
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
@@ -103,6 +105,18 @@ class ConnectionUtilsTest : JdbcTestCommons() {
         val result = conn.quickQueryItr("SELECT * FROM people"){ itr -> itr.maxBy { record -> record[1, Long::class] } }
         assertNotNull(result, "Max result is null")
         assertEquals(4.toLong(), result!![1], "Wrong max result returned")
+    }
+
+    @Test
+    fun testHandleParams() {
+        val stmt = MockPreparedStatement()
+        handleParams(stmt, "one", "two", listOf("three", "four"), null)
+        assertEquals(5, stmt.params.size)
+        assertEquals("one", stmt.params[1])
+        assertEquals("two", stmt.params[2])
+        assertEquals("three", stmt.params[3])
+        assertEquals("four", stmt.params[4])
+        assertEquals(Types.NULL, stmt.params[5])
     }
 
 }
