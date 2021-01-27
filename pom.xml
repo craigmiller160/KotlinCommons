@@ -5,7 +5,7 @@
 
     <groupId>io.craigmiller160</groupId>
     <artifactId>kotlin-commons</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -14,6 +14,19 @@
         <junit.version>4.12</junit.version>
         <kotlin.compiler.incremental>true</kotlin.compiler.incremental>
     </properties>
+
+    <distributionManagement>
+        <repository>
+            <id>nexus</id>
+            <name>Releases</name>
+            <url>http://craigpc:30003/repository/maven-releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>nexus</id>
+            <name>Snapshot</name>
+            <url>http://craigpc:30003/repository/maven-snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <dependencies>
         <dependency>
